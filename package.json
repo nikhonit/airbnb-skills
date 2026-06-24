@@ -1,0 +1,8 @@
+{
+  "name": "airbnb-skills",
+  "version": "1.0.0",
+  "description": "Agent skills for Airbnb stay data via StayingAPI.com",
+  "license": "MIT-0",
+  "homepage": "https://stayingapi.com",
+  "repository": { "type": "git", "url": "https://github.com/nikhonit/airbnb-skills" }
+}
