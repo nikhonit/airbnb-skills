@@ -1,6 +1,6 @@
 ---
 name: airbnb-full
-version: 1.0.0
+version: 1.0.1
 description: Complete Airbnb stay data toolkit via StayingAPI.com — id/URL/address lookup, sub-resources, listing search with presets, async batch jobs, job polling, webhook management, and account/usage. Plus the hosted MCP server's five tools.
 license: MIT-0
 author: Staying API

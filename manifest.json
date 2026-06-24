@@ -1,6 +1,6 @@
 {
   "name": "airbnb-skills",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Agent skills for Airbnb stay data via StayingAPI.com",
   "author": "Staying API",
   "homepage": "https://stayingapi.com",

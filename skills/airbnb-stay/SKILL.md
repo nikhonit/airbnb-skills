@@ -1,6 +1,6 @@
 ---
 name: airbnb-stay
-version: 1.0.0
+version: 1.0.1
 description: Single Airbnb listing lookups via StayingAPI.com — fetch one stay by id, airbnb.com/rooms URL, or street address, plus photos, reviews, host, amenities, availability, pricing, location, and rating.
 license: MIT-0
 author: Staying API

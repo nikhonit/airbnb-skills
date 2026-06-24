@@ -12,7 +12,7 @@ import urllib.parse
 import urllib.request
 
 API_BASE = "https://api.stayingapi.com/v1"
-USER_AGENT = "airbnb-skills/1.0.0 (+https://github.com/nikhonit/airbnb-skills)"
+USER_AGENT = "airbnb-skills/1.0.1 (+https://github.com/nikhonit/airbnb-skills)"
 TIMEOUT_SECONDS = 60
 
 

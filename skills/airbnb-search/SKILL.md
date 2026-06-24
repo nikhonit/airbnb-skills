@@ -1,6 +1,6 @@
 ---
 name: airbnb-search
-version: 1.0.0
+version: 1.0.1
 description: Search Airbnb listings by location, check-in/check-out dates, price, beds, capacity, and host attributes via StayingAPI.com — with superhost, instant-book, and luxury presets.
 license: MIT-0
 author: Staying API
