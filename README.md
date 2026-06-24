@@ -1,138 +1,74 @@
 # airbnb-skills
 
-**Airbnb stay data that doesn't break — typed REST + MCP, with reviews, pricing
-& availability. Free tier, no card.**
+**Agent skills for Airbnb stay data.** Three drop-in skills that let any agent look up and search Airbnb listings — photos, reviews, host, pricing, and 12-month availability — over the [Staying API](https://stayingapi.com). One typed `Stay` contract that doesn't break when Airbnb reworks their site, available as REST **and** MCP.
 
-Drop-in [agent skills](https://stayingapi.com) for looking up and searching
-Airbnb listings from Claude, Cursor, ChatGPT, or any script. Pure Python
-standard library — no `pip install`, no dependencies, no server to run. Backed by
-the [Staying API](https://stayingapi.com): one stable, versioned `Stay` contract
-instead of HTML scraping that breaks on the next redesign.
+Free to use — [grab a key](https://stayingapi.com/app/keys) (100 credits, no card required) and you're calling Airbnb stay data from Claude, ChatGPT, Cursor, or your own agent loop in under two minutes.
 
-[![License: MIT-0](https://img.shields.io/badge/License-MIT--0-blue.svg)](LICENSE)
-![Python stdlib — no deps](https://img.shields.io/badge/Python-stdlib%2C%20no%20deps-3776AB)
-![100 free credits, no card](https://img.shields.io/badge/free%20tier-100%20credits%2C%20no%20card-brightgreen)
+Pure Python standard library. No dependencies. MIT-0 licensed.
 
-> **Grab a free key — 100 credits, no card required:**
-> **https://stayingapi.com/app/keys**
-
-## Quickstart (under 2 minutes)
+## Install
 
 ```bash
-export STAYINGAPI_KEY="sk_..."   # free key: https://stayingapi.com/app/keys
-python skills/airbnb-stay/airbnb_stay.py https://www.airbnb.com/rooms/12345678
+# OpenClaw (via ClawHub)
+npx clawhub@latest install airbnb-full
+
+# Hermes Agent
+hermes skills install skills-sh/nikhonit/airbnb-skills/skills/airbnb-full
+
+# Generic agent skills (Claude Code, Cursor, Cline)
+npx skills add nikhonit/airbnb-skills
 ```
 
-That prints the full, typed `Stay` JSON for the listing. No build step — the
-scripts use only `urllib`/`json` from the standard library.
+## Skills in this repo
+
+| Skill | Purpose | Cost |
+|---|---|---|
+| [`airbnb-full`](skills/airbnb-full) | Complete toolkit — id/URL/address lookup, sub-resources, search, async batch jobs, webhooks, account/usage | 1 credit per record |
+| [`airbnb-stay`](skills/airbnb-stay) | Single-listing lookup plus photos, reviews, host, amenities, availability, pricing, location, rating | 1 credit per call |
+| [`airbnb-search`](skills/airbnb-search) | Location / date / price / capacity search with superhost, instant-book, and luxury presets | 1 credit per result |
+
+Install the bundled `airbnb-full` for agents that need broad coverage. Install the focused variants when you want minimum tool surface.
+
+## Authentication
+
+Set the `STAYINGAPI_KEY` environment variable to your Staying API key (format `sk_...`).
 
 ```bash
-# Search instead of look up
-python skills/airbnb-search/airbnb_search.py "Austin, TX" 10 priceMax=250 minBedrooms=2
-
-# Check your credit balance
-python skills/airbnb-full/airbnb_full.py me
+export STAYINGAPI_KEY="sk_..."
 ```
 
-## Skills
+**[Get a free key in 30 seconds](https://stayingapi.com/app/keys)** — 100 credits, no card required. The same key works for these skills, the [hosted MCP server](https://api.stayingapi.com/mcp), and direct REST calls.
 
-| Skill | What it does | Cost | Docs |
-|---|---|---|---|
-| **airbnb-stay** | One listing by id, URL, or address → full `Stay` plus photos, reviews, host, amenities, availability, pricing, location, rating. | 1 credit/call (`by-address`: 3) | [SKILL.md](skills/airbnb-stay/SKILL.md) |
-| **airbnb-search** | Search by location, dates, price, capacity, and host attributes (superhost / instant-book / luxury presets). | 1 credit per result | [SKILL.md](skills/airbnb-search/SKILL.md) |
-| **airbnb-full** | Everything: lookup + search + async batch jobs + job polling + webhooks + account/usage. Plus all five MCP tools. | per call/result | [SKILL.md](skills/airbnb-full/SKILL.md) |
+### Use over MCP instead
 
-You're only charged on a successful (`2xx`) response — `4xx`/`5xx` are free.
-Credits don't expire and roll forward.
-
-## Use with your agent
-
-### Claude Desktop / Claude Code (MCP)
-
-The Staying API ships a live MCP server, so most agents don't even need the
-scripts. Add this to your Claude Desktop config (or `claude mcp add`):
-
-```json
-{
-  "mcpServers": {
-    "stayingapi": {
-      "type": "streamable-http",
-      "url": "https://api.stayingapi.com/mcp",
-      "headers": { "Authorization": "Bearer sk_YOUR_KEY" }
-    }
-  }
-}
-```
-
-Five tools become available: `lookup_stay_by_id`, `lookup_stay_by_url`,
-`search_stays`, `get_stay_photos`, `get_stay_reviews`.
-
-### Cursor / `mcp` CLI
-
-Point any streamable-HTTP MCP client at the same endpoint:
-
-```bash
-mcp add stayingapi --url https://api.stayingapi.com/mcp \
-  --header "Authorization: Bearer sk_YOUR_KEY"
-```
-
-Auth is a Bearer key (`sk_...`) or OAuth 2.1 PKCE (scope `mcp:access`). The
-server card lives at
-[`/.well-known/mcp/server-card.json`](https://stayingapi.com/.well-known/mcp/server-card.json).
-
-### Generic agent / OpenAI Agents SDK / load the SKILL.md
-
-No MCP? Hand the agent a `SKILL.md` (each lists when to use it, the exact
-endpoints, the MCP-tool equivalents, and copy-paste examples) and let it shell
-out to the matching script, or call the REST API directly:
-
-```bash
-curl -s "https://api.stayingapi.com/v1/stays/by-url?url=https://www.airbnb.com/rooms/12345678" \
-  -H "Authorization: Bearer $STAYINGAPI_KEY"
-```
-
-The scripts are plain stdlib Python, so they run anywhere an agent can run a
-shell — Claude Code, the OpenAI Agents SDK, LangChain tools, a cron job, whatever.
-
-## Why Staying API (vs. a no-key scraper)
-
-- **A stable, versioned, typed `Stay` contract.** One canonical shape across every
-  endpoint. Your integration doesn't break when Airbnb reworks their HTML.
-- **First-class facets.** Reviews + rating breakdown, 12-month availability,
-  pricing, and host data are real endpoints — not best-effort scrapes.
-- **REST *and* MCP.** Use plain HTTP or the live MCP server, plus OAuth, async
-  batch jobs, and HMAC-signed webhooks for pipelines.
-- **Reliability.** A metered, authenticated backend means your agent won't
-  randomly get blocked mid-run.
+The Staying API hosts a streamable-HTTP MCP server, so MCP-native agents can skip the scripts entirely. Point your client at `https://api.stayingapi.com/mcp` with an `Authorization: Bearer sk_...` header (or OAuth 2.1 PKCE, scope `mcp:access`) to get five tools: `lookup_stay_by_id`, `lookup_stay_by_url`, `search_stays`, `get_stay_photos`, `get_stay_reviews`. Server card: <https://stayingapi.com/.well-known/mcp/server-card.json>.
 
 ## Pricing
 
 | Plan | Price | Credits | Rate limit |
 |---|---|---|---|
-| Free | $0 | 100 (one-time) | 20 req/min |
-| Monthly | $5/mo | 400 / month | 200 req/min |
-| Annual | $54/yr (~$4.50/mo) | 5,000 / year | 300 req/min |
-| Enterprise | Custom | Custom | 1,500 req/min |
+| Free | $0 | 100 (one-time) | 20/min |
+| Monthly | $5/mo | 400/month | 200/min |
+| Annual | $54/yr | 5,000/year | 300/min |
+| Enterprise | Custom | Custom | 1,500/min |
 
-Full details: [stayingapi.com/pricing](https://stayingapi.com/pricing).
+One credit equals one stay record returned (search bills per result; `by-address` weighs 3). Failed calls do not consume credits. Credits roll forward and don't expire.
 
-## Links
+## Source
 
-- **Get a key (free):** https://stayingapi.com/app/keys
-- **Homepage:** https://stayingapi.com
-- **Quickstart:** https://stayingapi.com/quickstart/
-- **OpenAPI 3.1 spec:** https://stayingapi.com/openapi.json
-- **MCP server card:** https://stayingapi.com/.well-known/mcp/server-card.json
-- **For AI agents:** https://stayingapi.com/ai-agents/
-- **llms.txt:** https://stayingapi.com/llms.txt · [llms-full.txt](https://stayingapi.com/llms-full.txt)
-- **Support:** support@stayingapi.com
+- API reference: <https://stayingapi.com/openapi.json>
+- Hosted MCP server: <https://api.stayingapi.com/mcp>
+- Quickstart: <https://stayingapi.com/quickstart/>
+- For AI agents: <https://stayingapi.com/ai-agents/>
+
+## Issues and contributions
+
+See [CONTRIBUTING.md](CONTRIBUTING.md). Security reports: [SECURITY.md](SECURITY.md).
 
 ## License
 
-[MIT-0](LICENSE) (MIT No Attribution) — use it however you like, no attribution
-required.
+[MIT No Attribution](LICENSE). Fork, ship, sublicense — no attribution required.
 
----
+## Trademark
 
-> Staying API is independent and not affiliated with, endorsed by, or sponsored
-> by Airbnb, Inc. Airbnb is a trademark of Airbnb, Inc.
+Staying API is an independent service and is not affiliated with, endorsed by, or sponsored by Airbnb, Inc. "Airbnb" is a registered trademark of Airbnb, Inc.

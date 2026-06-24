@@ -8,19 +8,19 @@
   "license": "MIT-0",
   "skills": [
     {
+      "name": "airbnb-full",
+      "path": "skills/airbnb-full",
+      "description": "Complete Airbnb stay data toolkit — id/URL/address lookup, sub-resources, search, async batch jobs, webhooks, account/usage."
+    },
+    {
       "name": "airbnb-stay",
       "path": "skills/airbnb-stay",
-      "description": "Look up a single Airbnb listing by id, URL, or street address — full canonical Stay shape plus photos, reviews, host, amenities, availability, pricing, location, and rating."
+      "description": "Single Airbnb listing lookup by id, URL, or address, plus photos, reviews, host, amenities, availability, pricing, location, and rating."
     },
     {
       "name": "airbnb-search",
       "path": "skills/airbnb-search",
-      "description": "Search Airbnb listings by location, dates, price, capacity, and host attributes (superhost, instant-book, luxury presets)."
-    },
-    {
-      "name": "airbnb-full",
-      "path": "skills/airbnb-full",
-      "description": "Complete Airbnb data toolkit: lookup, search, async batch jobs, job polling, paginated reads, webhook management, and account/usage — plus all five MCP tools."
+      "description": "Search Airbnb listings by location, dates, price, beds, capacity, and host attributes (superhost, instant-book, luxury)."
     }
   ]
 }

@@ -1,98 +1,128 @@
 ---
 name: airbnb-stay
-description: Look up a single Airbnb listing's full data — photos, reviews, host, amenities, availability, pricing, location, and star rating — by listing id, airbnb.com/rooms URL, or street address via the Staying API. Use when a user pastes an Airbnb link or id, or names a specific property, and wants its details, price, reviews, or availability.
+version: 1.0.0
+description: Single Airbnb listing lookups via StayingAPI.com — fetch one stay by id, airbnb.com/rooms URL, or street address, plus photos, reviews, host, amenities, availability, pricing, location, and rating.
+license: MIT-0
+author: Staying API
+homepage: https://stayingapi.com
+repository: https://github.com/nikhonit/airbnb-skills
+tags:
+  - airbnb
+  - short-term-rental
+  - vacation-rental
+  - listings
+  - reviews
+  - api
+  - mcp
+metadata:
+  openclaw:
+    primaryEnv: STAYINGAPI_KEY
+    homepage: https://stayingapi.com
+    requires:
+      env:
+        - STAYINGAPI_KEY
 ---
 
 # airbnb-stay
 
-Resolve one Airbnb listing to a clean, typed `Stay` object — then slice into any
-sub-resource you need. Backed by the [Staying API](https://stayingapi.com)
-(REST + MCP), not a fragile HTML scraper.
+Focused single-listing skill. Use when the user **explicitly asks** about one known Airbnb property — its details, price, reviews, availability, photos, or host — given a listing id, an `airbnb.com/rooms/...` URL, or a street address.
 
-## When to use
+## When to use this skill
 
-- A user pastes an `airbnb.com/rooms/...` link and asks "what is this place / how
-  much / is it any good / when is it free?"
-- You have a listing **id** or a **street address** and need structured data.
-- You need a specific facet: **reviews**, **rating** breakdown, **pricing**,
-  12-month **availability**, **host** profile, **amenities**, **photos**, or
-  **location** coordinates.
+**DO use when the user asks:**
 
-## Setup
+- "What's this place? https://www.airbnb.com/rooms/12345678"
+- "How much per night is listing 12345678?"
+- "What are the reviews like on this Airbnb?"
+- "Is this place available in July?"
+- "Who's the host / is it a superhost?"
+- "Show me the photos for this listing."
 
-```bash
-export STAYINGAPI_KEY="sk_..."   # free key (100 credits, no card): https://stayingapi.com/app/keys
-```
+**Do NOT use when:**
 
-The script reads `STAYINGAPI_KEY` and calls `https://api.stayingapi.com`.
+- An Airbnb link or address appears incidentally in context (email signatures, unrelated documents)
+- The user wants to *find* listings by criteria — use [`airbnb-search`](https://github.com/nikhonit/airbnb-skills/tree/main/skills/airbnb-search) instead
+- The user has not signaled they want a property lookup
 
-## Endpoints it calls
+If you also need batch resolution, search, or webhooks, use [`airbnb-full`](https://github.com/nikhonit/airbnb-skills/tree/main/skills/airbnb-full) — it bundles everything in one install.
 
-| Need | Endpoint |
-|---|---|
-| Full listing by id | `GET /v1/stays/{id}` |
-| Full listing by URL | `GET /v1/stays/by-url?url=...` |
-| Full listing by address | `GET /v1/stays/by-address?address=...` (3-credit weight) |
-| Photos | `GET /v1/stays/{id}/photos` |
-| Reviews + rating breakdown | `GET /v1/stays/{id}/reviews` |
-| Host profile | `GET /v1/stays/{id}/host` |
-| Amenities (grouped) | `GET /v1/stays/{id}/amenities` |
-| Availability calendar | `GET /v1/stays/{id}/availability` |
-| Pricing block | `GET /v1/stays/{id}/pricing` |
-| Location / coordinates | `GET /v1/stays/{id}/location` |
-| Star rating summary | `GET /v1/stays/{id}/rating` |
+## Tools
 
-Every endpoint accepts an optional `?fields=` sparse-fieldset to trim the payload.
+Every tool returns a Python dict — the API response on success, or `{"error": ..., "detail": ...}` on failure. Sub-resource tools accept `stay_id` (cheapest), `url`, or `address`.
+
+### `lookup_stay_by_id(stay_id, fields=None)` — 1 credit
+Full canonical `Stay` record: title, property/room type, capacity, star rating, location, host, pricing, reviews count, rating breakdown, photos, reviews, amenities, and availability. `fields` is an optional comma-separated projection.
+
+### `lookup_stay_by_url(url, fields=None)` — 1 credit
+Same record, resolved from an `airbnb.com/rooms/<id>` URL.
+
+### `lookup_stay_by_address(address, fields=None)` — 3 credits
+Resolve a listing from a street address. Weighted higher; prefer id or URL when you have one.
+
+### `get_stay_photos(...)` — 1 credit
+Photo gallery (responsive image URLs).
+
+### `get_stay_reviews(...)` — 1 credit
+Reviews plus the rating breakdown (cleanliness, accuracy, check-in, communication, location, value).
+
+### `get_stay_host(...)` — 1 credit
+Host profile (name, superhost status, response data).
+
+### `get_stay_amenities(...)` — 1 credit
+Amenities grouped by category.
+
+### `get_stay_availability(...)` — 1 credit
+Per-date availability calendar (up to 12 months).
+
+### `get_stay_pricing(...)` — 1 credit
+Pricing block: nightly rate, fees, currency.
+
+### `get_stay_location(...)` — 1 credit
+Coordinates and address.
+
+### `get_stay_rating(...)` — 1 credit
+Star rating and review-count summary.
 
 ## Equivalent MCP tools
 
-If your agent speaks MCP, skip the script and call the tools directly on
-`https://api.stayingapi.com/mcp`:
+The Staying API hosts a streamable-HTTP MCP server at `https://api.stayingapi.com/mcp`. If your agent speaks MCP, you can skip this skill and call: `lookup_stay_by_id`, `lookup_stay_by_url`, `get_stay_photos`, `get_stay_reviews`.
 
-- `lookup_stay_by_id` — full Stay by listing id
-- `lookup_stay_by_url` — full Stay from an `airbnb.com/rooms` URL
-- `get_stay_photos` — a listing's photos
-- `get_stay_reviews` — a listing's reviews + rating breakdown
+## Authentication
 
-(Host, amenities, availability, pricing, location, and rating are REST
-sub-resources — use the script or a direct `GET` for those.)
-
-## Examples
-
-**Python (this skill):**
+Set `STAYINGAPI_KEY` to your Staying API key (format `sk_...`).
 
 ```bash
-# Full listing from a URL
-python airbnb_stay.py https://www.airbnb.com/rooms/12345678
-
-# Full listing from an id
-python airbnb_stay.py 12345678
-
-# Just the reviews (works from id, URL, or address)
-python airbnb_stay.py 12345678 reviews
-python airbnb_stay.py https://www.airbnb.com/rooms/12345678 pricing
+export STAYINGAPI_KEY="sk_..."
 ```
 
-**curl:**
+Get a free key with 100 credits at <https://stayingapi.com/app/keys> — no card required.
 
-```bash
-curl -s https://api.stayingapi.com/v1/stays/12345678 \
-  -H "Authorization: Bearer $STAYINGAPI_KEY"
+## Pricing
 
-curl -s "https://api.stayingapi.com/v1/stays/by-url?url=https://www.airbnb.com/rooms/12345678" \
-  -H "Authorization: Bearer $STAYINGAPI_KEY"
-```
+| Plan | Price | Credits | Rate limit |
+|---|---|---|---|
+| Free | $0 | 100 (one-time) | 20/min |
+| Monthly | $5/mo | 400/month | 200/min |
+| Annual | $54/yr | 5,000/year | 300/min |
+| Enterprise | Custom | Custom | 1,500/min |
 
-## Notes
+One credit per successful call (`by-address` is 3). Failed calls (`4xx`/`5xx`) do not consume credits. Credits roll forward and don't expire.
 
-- **1 credit per successful call** (lookups and sub-resources). The
-  `by-address` resolver weighs **3 credits**.
-- **You're only charged on success (2xx).** `4xx`/`5xx` responses are free.
-- Credits don't expire and roll forward.
-- One canonical `Stay` shape across every endpoint — your code doesn't break when
-  Airbnb redesigns their site.
+## Errors
 
----
+Functions return a dict. On failure it carries an `error` key:
 
-> Staying API is independent and not affiliated with, endorsed by, or sponsored
-> by Airbnb, Inc. Airbnb is a trademark of Airbnb, Inc.
+- `{"error": "auth", ...}` — `STAYINGAPI_KEY` is missing or invalid
+- `{"error": "HTTP 404", ...}` — listing not found
+- `{"error": "HTTP 429", ...}` — rate-limited; back off and retry
+- `{"error": "network", ...}` — DNS/connection failure
+
+## API reference
+
+- OpenAPI spec: <https://stayingapi.com/openapi.json>
+- Hosted MCP server: <https://api.stayingapi.com/mcp>
+- Quickstart: <https://stayingapi.com/quickstart/>
+
+## Trademark
+
+Staying API is an independent service and is not affiliated with, endorsed by, or sponsored by Airbnb, Inc. "Airbnb" is a registered trademark of Airbnb, Inc.

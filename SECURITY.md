@@ -1,25 +1,25 @@
-# Security Policy
+# Security policy
 
 ## Reporting a vulnerability
 
-If you find a security issue in these skills or in the Staying API, email
-**[support@stayingapi.com](mailto:support@stayingapi.com)**. Please include steps
-to reproduce and the impact. We'll acknowledge and work a fix; please give us a
-reasonable window before public disclosure.
+Email **support@stayingapi.com** with the subject line `SECURITY: airbnb-skills`. Please do not open public issues for security reports.
 
-## Handling your API key
+We will acknowledge receipt within 72 hours and aim to publish a fix or mitigation within 14 days for confirmed issues.
 
-- Your key (`sk_...`) is a bearer credential. Anyone holding it can spend your
-  credits.
-- **Never commit a real key.** The scripts read it from the `STAYINGAPI_KEY`
-  environment variable for exactly this reason — keep it out of source, logs,
-  screenshots, and issue reports.
-- `.env` is git-ignored in this repo. Keep it that way.
-- Rotate a leaked key immediately from the dashboard:
-  [https://stayingapi.com/app/keys](https://stayingapi.com/app/keys).
+## Dependency surface
 
-## Scope
+The handlers in this repository use only the Python standard library:
 
-This repo contains no server and no scrapers — it is a stdlib HTTP client for a
-metered REST + MCP API. The most sensitive thing here is your key. Treat it like
-a password.
+- `urllib.request`, `urllib.parse`, `urllib.error` — HTTPS calls to `api.stayingapi.com`
+- `json` — request/response serialization
+- `os` — reading the `STAYINGAPI_KEY` environment variable
+
+There are no third-party packages, no transitive dependencies, and no build step. The only network destination is `https://api.stayingapi.com`.
+
+## Credential handling
+
+The skills read the API key from the `STAYINGAPI_KEY` environment variable at call time. They do not cache the key, write it to disk, or log it. Failed requests return a structured error rather than raising, so the key cannot leak into a traceback.
+
+## Trademark
+
+Staying API is an independent service and is not affiliated with, endorsed by, or sponsored by Airbnb, Inc.

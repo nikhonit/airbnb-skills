@@ -1,12 +1,13 @@
-# Python
 __pycache__/
 *.pyc
-*.pyo
-
-# Environment / secrets
 .env
+.env.local
 .venv/
 venv/
-
-# macOS
 .DS_Store
+node_modules/
+dist/
+build/
+*.log
+.vscode/
+.idea/

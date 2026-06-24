@@ -2,7 +2,26 @@
   "name": "airbnb-skills",
   "version": "1.0.0",
   "description": "Agent skills for Airbnb stay data via StayingAPI.com",
+  "homepage": "https://github.com/nikhonit/airbnb-skills",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nikhonit/airbnb-skills.git"
+  },
+  "bugs": {
+    "url": "https://github.com/nikhonit/airbnb-skills/issues"
+  },
+  "author": "Staying API",
   "license": "MIT-0",
-  "homepage": "https://stayingapi.com",
-  "repository": { "type": "git", "url": "https://github.com/nikhonit/airbnb-skills" }
+  "keywords": [
+    "airbnb",
+    "stayingapi",
+    "agent-skills",
+    "mcp",
+    "short-term-rental",
+    "vacation-rental",
+    "stay-data",
+    "claude",
+    "openai",
+    "cursor"
+  ]
 }
